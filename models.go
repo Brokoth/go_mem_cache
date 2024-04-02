@@ -18,7 +18,18 @@ type CacheConfig struct {
 }
 
 type Cache struct {
-	data   map[string]string
+	data   map[interface{}]cacheEntry
 	config CacheConfig
-	CacheMethods
+}
+
+type cacheEntry struct {
+	Value          interface{}
+	SlidingTimeout time.Duration
+	VariableExpiry time.Time
+	AbsoluteExpiry time.Time
+}
+
+type CacheEntryConfig struct {
+	SlidingTimeout  time.Duration
+	AbsoluteTimeout time.Duration
 }
