@@ -24,6 +24,9 @@ func (cache Cache) Get(key interface{}) (value interface{}, err error) {
 }
 
 func (cache Cache) Add(key interface{}, value interface{}, config CacheEntryConfig) error {
+	config.AbsoluteTimeout = config.AbsoluteTimeout.Abs()
+	config.SlidingTimeout = config.SlidingTimeout.Abs()
+
 	if cache.config.MaxEntries != -1 && len(cache.data) >= int(cache.config.MaxEntries) {
 		return errors.New("maximum limit of cache entries reached")
 	}

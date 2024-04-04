@@ -15,6 +15,7 @@ func NewCache(config CacheConfig) (resultCache *Cache, err error) {
 		return nil, errors.New("MaxSizeBytes field in CacheConfig must be -1 or greater than 0")
 	}
 
+	config.ClearingCycleTime = config.ClearingCycleTime.Abs()
 	var cache Cache
 	cache.config = config
 	go cache.CleanCache()
