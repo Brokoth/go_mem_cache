@@ -14,7 +14,7 @@ func (cache Cache) Get(key interface{}) (value interface{}, err error) {
 		return nil, errors.New("key not found")
 	}
 
-	if cacheEntry.AbsoluteExpiry.Compare(currentTime) == -1 || cacheEntry.VariableExpiry.Compare(currentTime) == -1 {
+	if cacheEntry.Expires && (cacheEntry.AbsoluteExpiry.Compare(currentTime) == -1 || cacheEntry.VariableExpiry.Compare(currentTime) == -1) {
 		delete(cache.data, key)
 		return nil, errors.New("key not found")
 	}
@@ -62,7 +62,7 @@ func (cache Cache) CleanCache() {
 		for key := range cache.data {
 			cacheEntry := cache.data[key]
 
-			if cacheEntry.AbsoluteExpiry.Compare(currentTime) == -1 || cacheEntry.VariableExpiry.Compare(currentTime) == -1 {
+			if cacheEntry.Expires && (cacheEntry.AbsoluteExpiry.Compare(currentTime) == -1 || cacheEntry.VariableExpiry.Compare(currentTime) == -1) {
 				delete(cache.data, key)
 			}
 

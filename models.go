@@ -27,9 +27,11 @@ type cacheEntry struct {
 	SlidingTimeout time.Duration
 	VariableExpiry time.Time
 	AbsoluteExpiry time.Time
+	Expires        bool
 }
 
 type CacheEntryConfig struct {
 	SlidingTimeout  time.Duration
 	AbsoluteTimeout time.Duration
+	Expires         bool
 }

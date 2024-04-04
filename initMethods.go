@@ -26,6 +26,7 @@ func NewCacheEntryConfig() CacheEntryConfig {
 	var cacheEntryConfig CacheEntryConfig
 	cacheEntryConfig.SlidingTimeout = 0
 	cacheEntryConfig.AbsoluteTimeout = 60 * time.Second
+	cacheEntryConfig.Expires = true
 	return cacheEntryConfig
 }
 
