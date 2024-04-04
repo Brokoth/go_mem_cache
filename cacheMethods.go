@@ -56,7 +56,7 @@ func (cache Cache) Clear() {
 }
 
 func (cache Cache) CleanCache() {
-	for 0 < 1 {
+	for {
 		var currentTime = time.Now().UTC()
 
 		for key := range cache.data {
