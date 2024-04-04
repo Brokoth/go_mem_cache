@@ -18,6 +18,7 @@ func NewCache(config CacheConfig) (resultCache *Cache, err error) {
 	config.ClearingCycleTime = config.ClearingCycleTime.Abs()
 	var cache Cache
 	cache.config = config
+	cache.data = make(map[interface{}]cacheEntry)
 	go cache.CleanCache()
 	return &cache, nil
 }
