@@ -58,7 +58,7 @@ func (cache Cache) Clear() {
 
 func (cache Cache) CleanCache() {
 	for {
-		log.Println("clean cache running")
+		log.Println("Size of cache before cleaning: ", len(cache.data))
 		var currentTime = time.Now().UTC()
 
 		for key := range cache.data {
@@ -69,7 +69,7 @@ func (cache Cache) CleanCache() {
 			}
 
 		}
-
+		log.Println("Size of cache after cleaning: ", len(cache.data))
 		time.Sleep(cache.config.ClearingCycleTime)
 	}
 }
