@@ -2,6 +2,7 @@ package gomemcache
 
 import (
 	"errors"
+	"log"
 	"reflect"
 	"time"
 )
@@ -57,6 +58,7 @@ func (cache Cache) Clear() {
 
 func (cache Cache) CleanCache() {
 	for {
+		log.Println("clean cache running")
 		var currentTime = time.Now().UTC()
 
 		for key := range cache.data {
