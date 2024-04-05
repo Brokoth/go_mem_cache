@@ -4,13 +4,6 @@ import (
 	"time"
 )
 
-type CacheMethods interface {
-	Get()
-	Add()
-	Remove()
-	Clear()
-}
-
 type CacheConfig struct {
 	ClearingCycleTime time.Duration
 	MaxEntries        int64
@@ -20,6 +13,7 @@ type CacheConfig struct {
 type Cache struct {
 	data   map[interface{}]cacheEntry
 	config CacheConfig
+	Name   string
 }
 
 type cacheEntry struct {

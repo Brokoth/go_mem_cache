@@ -19,11 +19,11 @@ func NewCache(config CacheConfig) (resultCache *Cache, err error) {
 	var cache Cache
 	cache.config = config
 	cache.data = make(map[interface{}]cacheEntry)
-	go cache.CleanCache()
+	go CleanCache(&cache)
 	return &cache, nil
 }
 
-func NewCacheEntryConfig() CacheEntryConfig {
+func DefaultCacheEntryConfig() CacheEntryConfig {
 	var cacheEntryConfig CacheEntryConfig
 	cacheEntryConfig.SlidingTimeout = 0
 	cacheEntryConfig.AbsoluteTimeout = 60 * time.Second
@@ -31,9 +31,9 @@ func NewCacheEntryConfig() CacheEntryConfig {
 	return cacheEntryConfig
 }
 
-func NewCacheConfig() CacheConfig {
+func DefaultCacheConfig() CacheConfig {
 	var cacheConfig CacheConfig
-	cacheConfig.ClearingCycleTime = 60 * time.Second
+	cacheConfig.ClearingCycleTime = time.Minute
 	cacheConfig.MaxEntries = -1
 	cacheConfig.MaxSizeBytes = -1
 	return cacheConfig

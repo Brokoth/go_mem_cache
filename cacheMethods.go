@@ -2,7 +2,6 @@ package gomemcache
 
 import (
 	"errors"
-	"log"
 	"reflect"
 	"time"
 )
@@ -42,6 +41,7 @@ func (cache Cache) Add(key interface{}, value interface{}, config CacheEntryConf
 	cacheEntry.AbsoluteExpiry = currentTime.Add(config.AbsoluteTimeout)
 	cacheEntry.SlidingTimeout = config.SlidingTimeout
 	cacheEntry.VariableExpiry = currentTime.Add(config.AbsoluteTimeout)
+	cacheEntry.Expires = config.Expires
 	cache.data[key] = cacheEntry
 	return nil
 }
@@ -56,9 +56,8 @@ func (cache Cache) Clear() {
 	}
 }
 
-func (cache Cache) CleanCache() {
+func CleanCache(cache *Cache) {
 	for {
-		log.Println("Size of cache before cleaning: ", len(cache.data))
 		var currentTime = time.Now().UTC()
 
 		for key := range cache.data {
@@ -69,7 +68,7 @@ func (cache Cache) CleanCache() {
 			}
 
 		}
-		log.Println("Size of cache after cleaning: ", len(cache.data))
+
 		time.Sleep(cache.config.ClearingCycleTime)
 	}
 }
