@@ -1,6 +1,7 @@
 package gomemcache
 
 import (
+	"sync"
 	"time"
 )
 
@@ -13,7 +14,7 @@ type CacheConfig struct {
 type Cache struct {
 	data   map[interface{}]cacheEntry
 	config CacheConfig
-	Name   string
+	sync.RWMutex
 }
 
 type cacheEntry struct {

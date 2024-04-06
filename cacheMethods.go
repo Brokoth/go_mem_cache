@@ -6,24 +6,34 @@ import (
 	"time"
 )
 
-func (cache Cache) Get(key interface{}) (value interface{}, err error) {
+func (cache *Cache) Get(key interface{}) (value interface{}, err error) {
 	var currentTime = time.Now().UTC()
-	cacheEntry, ok := cache.data[key]
+	cacheEntry, ok := readMapEntry(cache, key)
 
 	if !ok {
 		return nil, errors.New("key not found")
 	}
 
 	if cacheEntry.Expires && (cacheEntry.AbsoluteExpiry.Compare(currentTime) == -1 || cacheEntry.VariableExpiry.Compare(currentTime) == -1) {
-		delete(cache.data, key)
+		deleteCacheEntry(cache, key)
 		return nil, errors.New("key not found")
 	}
 
 	cacheEntry.VariableExpiry = cacheEntry.VariableExpiry.Add(cacheEntry.SlidingTimeout)
+	writeMapEntry(cache, key, cacheEntry)
 	return cacheEntry.Value, nil
 }
 
-func (cache Cache) Add(key interface{}, value interface{}, config CacheEntryConfig) error {
+func (cache *Cache) Add(key interface{}, value interface{}, config CacheEntryConfig) error {
+
+	if _, ok := key.(*Cache); ok {
+		return errors.New("the go_mem_cache.Cache type cannot be used as a key")
+	}
+
+	if _, ok := value.(*Cache); ok {
+		return errors.New("the go_mem_cache.Cache type cannot be used as a value")
+	}
+
 	config.AbsoluteTimeout = config.AbsoluteTimeout.Abs()
 	config.SlidingTimeout = config.SlidingTimeout.Abs()
 
@@ -42,17 +52,17 @@ func (cache Cache) Add(key interface{}, value interface{}, config CacheEntryConf
 	cacheEntry.SlidingTimeout = config.SlidingTimeout
 	cacheEntry.VariableExpiry = currentTime.Add(config.AbsoluteTimeout)
 	cacheEntry.Expires = config.Expires
-	cache.data[key] = cacheEntry
+	writeMapEntry(cache, key, cacheEntry)
 	return nil
 }
 
-func (cache Cache) Remove(key interface{}) {
-	delete(cache.data, key)
+func (cache *Cache) Remove(key interface{}) {
+	deleteCacheEntry(cache, key)
 }
 
-func (cache Cache) Clear() {
-	for k := range cache.data {
-		delete(cache.data, k)
+func (cache *Cache) Clear() {
+	for key := range cache.data {
+		deleteCacheEntry(cache, key)
 	}
 }
 
@@ -61,14 +71,33 @@ func CleanCache(cache *Cache) {
 		var currentTime = time.Now().UTC()
 
 		for key := range cache.data {
-			cacheEntry := cache.data[key]
+			cacheEntry, _ := readMapEntry(cache, key)
 
 			if cacheEntry.Expires && (cacheEntry.AbsoluteExpiry.Compare(currentTime) == -1 || cacheEntry.VariableExpiry.Compare(currentTime) == -1) {
-				delete(cache.data, key)
+				deleteCacheEntry(cache, key)
 			}
 
 		}
 
 		time.Sleep(cache.config.ClearingCycleTime)
 	}
+}
+
+func readMapEntry(cache *Cache, key interface{}) (cacheEntry, bool) {
+	cache.RLock()
+	defer cache.RUnlock()
+	cacheEntry, ok := cache.data[key]
+	return cacheEntry, ok
+}
+
+func writeMapEntry(cache *Cache, key interface{}, cacheEntry cacheEntry) {
+	cache.Lock()
+	defer cache.Unlock()
+	cache.data[key] = cacheEntry
+}
+
+func deleteCacheEntry(cache *Cache, key interface{}) {
+	cache.Lock()
+	defer cache.Unlock()
+	delete(cache.data, key)
 }
