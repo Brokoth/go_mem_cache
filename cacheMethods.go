@@ -69,16 +69,20 @@ func (cache *Cache) Clear() {
 func CleanCache(cache *Cache) {
 	for {
 		var currentTime = time.Now().UTC()
+		cache.RLock()
 
 		for key := range cache.data {
+			cache.RUnlock()
 			cacheEntry, _ := readMapEntry(cache, key)
 
 			if cacheEntry.Expires && (cacheEntry.AbsoluteExpiry.Compare(currentTime) == -1 || cacheEntry.VariableExpiry.Compare(currentTime) == -1) {
 				deleteCacheEntry(cache, key)
 			}
 
+			cache.RLock()
 		}
 
+		cache.RUnlock()
 		time.Sleep(cache.config.ClearingCycleTime)
 	}
 }
